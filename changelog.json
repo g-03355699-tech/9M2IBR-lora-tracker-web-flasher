@@ -1,5 +1,10 @@
 [
     {
+        "version": "v1.04",
+        "date": "23 Jul 2026",
+        "changelog": "- APRS-IS login is now verified before trusting the connection - previously the firmware marked the session connected right after writing the login line without checking the server's response, so an unverified login (bad passcode/callsign) silently dropped every packet with no indication why. It now waits for and checks the server's logresp reply.\n- Delayed APRS-IS queue hardening: capped at 20 entries (oldest dropped first) instead of growing unbounded during an outage, and a backlog of overdue entries is now paced at least 2 seconds apart instead of being sent in one burst.\n- APRS-IS TCP writes are now checked and retried: a failed/partial write to the delayed queue is kept and retried (up to 3 attempts) instead of silently discarding that beacon. One-shot sends (message acks, iGate RF>IS forwarding) now log a warning on incomplete writes.\n- Web config: navbar title now shows just the callsign (\"9M2IBR's LoRa Tracker\") instead of including the SSID; the Message tab callsign input is narrower, giving the Send-via checkboxes more room."
+    },
+    {
         "version": "v1.03",
         "date": "23 Jul 2026",
         "changelog": "- Process inbound APRS-IS messages: messages sent to your callsign over APRS-IS are now received, displayed, saved to the on-device store, logged in the web Message tab, and acked back (previously only outbound uplink worked).\n- Fixed the time source indicator falsely showing 'G' (GPS) before any time sync had actually happened."

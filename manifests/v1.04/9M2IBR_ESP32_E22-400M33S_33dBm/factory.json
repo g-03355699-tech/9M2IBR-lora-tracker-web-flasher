@@ -1,0 +1,16 @@
+{
+    "name": "9M2IBR LoRa APRS Tracker - 9M2IBR_ESP32_E22-400M33S_33dBm",
+    "version": "v1.04",
+    "new_install_prompt_erase": true,
+    "builds": [
+        {
+            "chipFamily": "ESP32",
+            "parts": [
+                {
+                    "path": "../../../bins/v1.04/9M2IBR_ESP32_E22-400M33S_33dBm/web_factory.bin",
+                    "offset": 0
+                }
+            ]
+        }
+    ]
+}
