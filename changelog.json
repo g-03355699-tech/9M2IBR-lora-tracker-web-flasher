@@ -1,0 +1,22 @@
+[
+    {
+        "version": "v1.03",
+        "date": "23 Jul 2026",
+        "changelog": "- Process inbound APRS-IS messages: messages sent to your callsign over APRS-IS are now received, displayed, saved to the on-device store, logged in the web Message tab, and acked back (previously only outbound uplink worked).\n- Fixed the time source indicator falsely showing 'G' (GPS) before any time sync had actually happened."
+    },
+    {
+        "version": "v1.02",
+        "date": "22 Jul 2026",
+        "changelog": "- Web config navbar now shows the tracker's actual active callsign instead of a static label.\n- WiFi STA network list: replaced the text remove button with a trash-can icon.\n- New \"About\" tab: callsign, firmware version, LoRa module/power/band, hardware ID, chip info, flash size, free heap, uptime.\n- New \"Message\" tab: send APRS messages via LoRa RF and/or APRS-IS, view/delete the last 10 sent/received messages.\n- Various web UI layout and navigation fixes."
+    },
+    {
+        "version": "v1.01",
+        "date": "22 Jul 2026",
+        "changelog": "- Web config dark mode: Light/Dark/Auto theme switcher, remembered per-browser.\n- Fixed a choppy \"Last Rx\" ticker on the OLED display.\n- Messages > APRSThursday menu now exits back to the previous menu after the last item instead of wrapping around."
+    },
+    {
+        "version": "v1.00",
+        "date": "22 Jul 2026",
+        "changelog": "- First versioned release of this fork: trimmed the board list down to the 4 variants actually in use, rebranded startup/log/web-UI text.\n- Fixed a batch of bugs found during review: config-load crashes on corrupt/missing data, a stack buffer overflow from unvalidated received-packet data, an out-of-bounds symbol-array read, ISR-unsafe shared state on button/joystick input, a WiFi STA reconnect loop issue, and several SmartBeacon/menu-navigation/units logic bugs."
+    }
+]

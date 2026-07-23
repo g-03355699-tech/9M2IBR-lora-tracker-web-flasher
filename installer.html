@@ -10,6 +10,8 @@
         />
         <style>
             .card { max-width: 560px; margin: 0 auto; }
+            .changelog { max-width: 560px; margin: 1.5rem auto 0; }
+            .changelog ul { margin-bottom: 0.5rem; padding-left: 1.2rem; }
         </style>
     </head>
     <body class="bg-body-tertiary">
@@ -72,6 +74,11 @@
                     </p>
                 </div>
             </div>
+
+            <div class="changelog">
+                <h2 class="h5 mb-3">Changelog</h2>
+                <div id="changelogList" class="text-body-secondary small">Loading changelog&hellip;</div>
+            </div>
         </div>
 
         <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
@@ -116,6 +123,54 @@
 
             boardSelect.addEventListener("change", updateManifest);
             versionSelect.addEventListener("change", updateManifest);
+
+            function escapeHtml(text) {
+                var div = document.createElement("div");
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // Renders each changelog entry's free-text body: consecutive "- " lines
+            // become a <ul>, everything else stays as a paragraph.
+            function renderChangelogBody(text) {
+                var html = "";
+                var listItems = [];
+                function flushList() {
+                    if (listItems.length) {
+                        html += "<ul>" + listItems.map(function (i) { return "<li>" + i + "</li>"; }).join("") + "</ul>";
+                        listItems = [];
+                    }
+                }
+                (text || "").split("\n").forEach(function (line) {
+                    line = line.trim();
+                    if (!line) return;
+                    if (line.indexOf("- ") === 0) {
+                        listItems.push(escapeHtml(line.slice(2)));
+                    } else {
+                        flushList();
+                        html += "<p>" + escapeHtml(line) + "</p>";
+                    }
+                });
+                flushList();
+                return html;
+            }
+
+            var changelogList = document.getElementById("changelogList");
+            fetch("changelog.json")
+                .then(function (response) { return response.json(); })
+                .then(function (entries) {
+                    if (!entries.length) {
+                        changelogList.textContent = "No changelog entries yet.";
+                        return;
+                    }
+                    changelogList.innerHTML = entries.map(function (e) {
+                        var heading = e.date ? (e.version + " — " + e.date) : e.version;
+                        return "<h3 class=\"h6 mt-3\">" + escapeHtml(heading) + "</h3>" + renderChangelogBody(e.changelog);
+                    }).join("");
+                })
+                .catch(function () {
+                    changelogList.textContent = "Failed to load changelog.json";
+                });
         </script>
     </body>
 </html>
