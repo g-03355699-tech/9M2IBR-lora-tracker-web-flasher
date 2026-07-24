@@ -11,7 +11,7 @@
         />
         <style>
             .card { max-width: 560px; margin: 0 auto; }
-            .changelog { max-width: 560px; margin: 1.5rem auto 0; }
+            .variants, .changelog { max-width: 720px; margin: 1.5rem auto 0; }
             .changelog ul { margin-bottom: 0.5rem; padding-left: 1.2rem; }
         </style>
     </head>
@@ -29,6 +29,7 @@
                             <option value="9M2IBR_ESP32_E22P-433M30S_30dBm">Ebyte E22P-433M30S &minus; 30dBm / 433MHz</option>
                             <option value="9M2IBR_ESP32_E22-400M30S_30dBm">Ebyte E22-400M30S &minus; 30dBm / 400MHz</option>
                             <option value="9M2IBR_ESP32_E22-400M22S_22dBm">Ebyte E22-400M22S &minus; 22dBm / 400MHz</option>
+                            <option value="9M2IBR_ESP32_E22-400M30S_30dBm_096OLED">Ebyte E22-400M30S &minus; 30dBm / 400MHz (0.96&quot; OLED)</option>
                         </select>
                     </div>
 
@@ -40,7 +41,27 @@
                     </div>
                     <p id="versionInfo" class="small text-body-secondary text-start mb-3"></p>
 
-                    <p class="small text-body-secondary">
+                    <div class="mb-3 text-start">
+                        <label class="form-label d-block">Install mode</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="mode" id="mode-factory" value="factory" checked>
+                            <label class="form-check-label" for="mode-factory">
+                                <b>Full factory install</b> &minus; first flash or factory reset. Writes bootloader,
+                                partitions and filesystem together. <span class="text-warning">Erases existing SPIFFS config.</span>
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="mode" id="mode-update" value="update">
+                            <label class="form-check-label" for="mode-update">
+                                <b>Firmware update only</b> &minus; writes just the app firmware, keeps your saved
+                                settings (callsign, WiFi, beacons, etc). Only use this on a device already running
+                                this tracker's firmware with the same board variant &minus; a blank or mismatched
+                                device still needs a full factory install first.
+                            </label>
+                        </div>
+                    </div>
+
+                    <p id="modeNote" class="small text-body-secondary">
                         First flash or factory reset &minus; writes bootloader, partitions and filesystem
                         together (<code>web_factory.bin</code>). Existing SPIFFS config will be erased.
                     </p>
@@ -76,6 +97,66 @@
                 </div>
             </div>
 
+            <div class="variants">
+                <h2 class="h5 mb-3">Board variants</h2>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered align-middle small">
+                        <thead>
+                            <tr>
+                                <th scope="col">PlatformIO environment</th>
+                                <th scope="col">LoRa module</th>
+                                <th scope="col">TX power</th>
+                                <th scope="col">Frequency band</th>
+                                <th scope="col"><code>HAS_1W_LORA</code></th>
+                                <th scope="col">OLED</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>9M2IBR_ESP32_E22-400M33S_33dBm</code> <strong>(default)</strong></td>
+                                <td>Ebyte E22-400M33S</td>
+                                <td>33 dBm</td>
+                                <td>400 MHz</td>
+                                <td>yes</td>
+                                <td>1.3" SH1106</td>
+                            </tr>
+                            <tr>
+                                <td><code>9M2IBR_ESP32_E22P-433M30S_30dBm</code></td>
+                                <td>Ebyte E22P-433M30S</td>
+                                <td>30 dBm</td>
+                                <td>433 MHz</td>
+                                <td>yes</td>
+                                <td>1.3" SH1106</td>
+                            </tr>
+                            <tr>
+                                <td><code>9M2IBR_ESP32_E22-400M30S_30dBm</code></td>
+                                <td>Ebyte E22-400M30S</td>
+                                <td>30 dBm</td>
+                                <td>400 MHz</td>
+                                <td>yes</td>
+                                <td>1.3" SH1106</td>
+                            </tr>
+                            <tr>
+                                <td><code>9M2IBR_ESP32_E22-400M22S_22dBm</code></td>
+                                <td>Ebyte E22-400M22S</td>
+                                <td>22 dBm</td>
+                                <td>400 MHz</td>
+                                <td><strong>no</strong> (only non-1W variant)</td>
+                                <td>1.3" SH1106</td>
+                            </tr>
+                            <tr>
+                                <td><code>9M2IBR_ESP32_E22-400M30S_30dBm_096OLED</code></td>
+                                <td>Ebyte E22-400M30S</td>
+                                <td>30 dBm</td>
+                                <td>400 MHz</td>
+                                <td>yes</td>
+                                <td><strong>0.96" SSD1306</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div class="changelog">
                 <h2 class="h5 mb-3">Changelog</h2>
                 <div id="changelogList" class="text-body-secondary small">Loading changelog&hellip;</div>
@@ -87,14 +168,32 @@
             var boardSelect = document.getElementById("board");
             var versionSelect = document.getElementById("version");
             var versionInfo = document.getElementById("versionInfo");
+            var modeNote = document.getElementById("modeNote");
+            var modeRadios = document.getElementsByName("mode");
             var installButton = document.querySelector("esp-web-install-button");
             var releaseDates = {};
+
+            var modeNotes = {
+                factory: "First flash or factory reset &minus; writes bootloader, partitions and filesystem " +
+                    "together (<code>web_factory.bin</code>). Existing SPIFFS config will be erased.",
+                update: "Updates only the app firmware (<code>firmware.bin</code>) at the existing partition " +
+                    "layout. Your saved settings (tracker_conf.json on SPIFFS) are left untouched."
+            };
+
+            function selectedMode() {
+                for (var i = 0; i < modeRadios.length; i++) {
+                    if (modeRadios[i].checked) return modeRadios[i].value;
+                }
+                return "factory";
+            }
 
             function updateManifest() {
                 var version = versionSelect.value;
                 var board = boardSelect.value;
+                var mode = selectedMode();
                 if (!version || !board) return;
-                installButton.manifest = "manifests/" + version + "/" + board + "/factory.json";
+                installButton.manifest = "manifests/" + version + "/" + board + "/" + mode + ".json";
+                modeNote.innerHTML = modeNotes[mode];
                 var date = releaseDates[version];
                 versionInfo.textContent = date ? ("Selected version: " + version + " — released " + date) : ("Selected version: " + version);
             }
@@ -124,6 +223,7 @@
 
             boardSelect.addEventListener("change", updateManifest);
             versionSelect.addEventListener("change", updateManifest);
+            modeRadios.forEach(function (el) { el.addEventListener("change", updateManifest); });
 
             function escapeHtml(text) {
                 var div = document.createElement("div");
