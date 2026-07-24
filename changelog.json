@@ -1,5 +1,10 @@
 [
     {
+        "version": "v1.06",
+        "date": "24 Jul 2026",
+        "changelog": "- Web flasher: added a favicon to the flasher site (reuses the firmware's existing icon) - it was previously falling back to the browser's default tab icon. No firmware behavior changes in this release."
+    },
+    {
         "version": "v1.05",
         "date": "24 Jul 2026",
         "changelog": "- CPU speed control - the CPU clock was previously hardcoded to 80MHz at boot with no way to change it. Added a persisted setting (80/160/240MHz) selectable from Configuration > Display > CPU Speed on-device or from the Display section of the web config UI, applied immediately and saved to flash.\n- Smoother battery reading - on boards without ADC_CTRL, the on-screen battery voltage/percentage was resampled every loop() iteration and visibly flickered from ADC noise on the raw resistor-divider path. The ADC read is now 16x-oversampled, and the displayed value updates at most once a second with exponential smoothing instead of jumping with every sample.\n- Web config: fixed the mobile (collapsed) navbar menu, where each tab centered independently on its own text width instead of lining up - tabs are now left-justified with consistent spacing on narrow screens."
